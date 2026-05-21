@@ -70,6 +70,8 @@ export interface Database {
           pontuacao: number
           iniciada_em: string
           concluida_em: string | null
+          duracao_segundos: number | null
+          metadata: Json | null
         }
         Insert: {
           id?: string
@@ -78,6 +80,8 @@ export interface Database {
           pontuacao?: number
           iniciada_em?: string
           concluida_em?: string | null
+          duracao_segundos?: number | null
+          metadata?: Json | null
         }
         Update: {
           id?: string
@@ -86,6 +90,8 @@ export interface Database {
           pontuacao?: number
           iniciada_em?: string
           concluida_em?: string | null
+          duracao_segundos?: number | null
+          metadata?: Json | null
         }
         Relationships: [
           {

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { GolpeTaAiGame } from '@/components/jogos/golpe-ta-ai/GolpeTaAiGame'
 
 interface JogoPageProps {
   params: Promise<{ slug: string }>
@@ -6,6 +7,10 @@ interface JogoPageProps {
 
 export default async function JogoPage({ params }: JogoPageProps) {
   const { slug } = await params
+
+  if (slug === 'golpe-ta-ai') {
+    return <GolpeTaAiGame />
+  }
 
   return (
     <div
