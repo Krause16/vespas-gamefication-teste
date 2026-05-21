@@ -7,7 +7,8 @@
       "PowerShell(cd C:\\\\Users\\\\nicho\\\\Downloads\\\\vespas-docs; $env:CI = \"true\"; npx shadcn@latest add button card badge progress tabs toast --overwrite --yes 2>&1)",
       "PowerShell(cd C:\\\\Users\\\\nicho\\\\Downloads\\\\vespas-docs; $env:CI = \"true\"; npx shadcn@latest add button card badge progress tabs sonner --overwrite --yes 2>&1)",
       "PowerShell(Get-Content *)",
-      "PowerShell(cd C:\\\\Users\\\\nicho\\\\Downloads\\\\vespas-docs; Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notmatch \"node_modules|\\\\.next\" } | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\nicho\\\\Downloads\\\\vespas-docs\\\\\", \"\"\\) } | Sort-Object)"
+      "PowerShell(cd C:\\\\Users\\\\nicho\\\\Downloads\\\\vespas-docs; Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notmatch \"node_modules|\\\\.next\" } | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\nicho\\\\Downloads\\\\vespas-docs\\\\\", \"\"\\) } | Sort-Object)",
+      "Bash(npm run *)"
     ]
   }
 }

@@ -114,11 +114,14 @@ export default function EntrarPage() {
               aria-label="Entrar na sala"
             >
               {carregando ? (
-                <Loader2
-                  size={18}
-                  className="animate-spin"
-                  aria-hidden="true"
-                />
+                <>
+                  <Loader2
+                    size={18}
+                    className="animate-spin"
+                    aria-hidden="true"
+                  />
+                  verificando...
+                </>
               ) : (
                 'ENTRAR'
               )}

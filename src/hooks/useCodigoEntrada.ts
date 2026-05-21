@@ -3,6 +3,9 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSessaoStore } from '@/stores/sessaoStore'
+import { entrarAnonymously } from '@/lib/supabase/auth'
+import { buscarSalaPorCodigo } from '@/lib/supabase/salas'
+import { criarJogador } from '@/lib/supabase/jogadores'
 
 interface UseCodigoEntradaReturn {
   digitos: string[]
@@ -63,12 +66,34 @@ export function useCodigoEntrada(): UseCodigoEntradaReturn {
   async function handleEntrar(): Promise<void> {
     if (!completo || carregando) return
     setCarregando(true)
+    setErro(null)
 
-    // Simula latência de rede — Sprint 2 valida código contra Supabase
-    await new Promise<void>((resolve) => setTimeout(resolve, 400))
+    try {
+      const codigo = digitos.join('')
 
-    entrarNaSala(digitos.join(''), 'Agente #1337')
-    router.push('/hub')
+      const user = await entrarAnonymously()
+
+      const sala = await buscarSalaPorCodigo(codigo)
+      if (!sala) {
+        setErro('Sala não encontrada ou encerrada')
+        return
+      }
+
+      const apelido = `Agente #${Math.floor(1000 + Math.random() * 9000)}`
+      const jogador = await criarJogador({
+        sala_id: sala.id,
+        apelido,
+        auth_user_id: user.id,
+      })
+
+      entrarNaSala(codigo, apelido, sala.id, jogador.id)
+      router.push('/hub')
+    } catch (e) {
+      const mensagem = e instanceof Error ? e.message : 'Erro inesperado. Tente novamente.'
+      setErro(mensagem)
+    } finally {
+      setCarregando(false)
+    }
   }
 
   return {
