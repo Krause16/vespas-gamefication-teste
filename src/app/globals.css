@@ -1,0 +1,138 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* ===== VESPAS BRAND COLORS ===== */
+  --color-vespa-grafite:   var(--vespa-grafite);
+  --color-vespa-esmeralda: var(--vespa-esmeralda);
+  --color-vespa-nevoa:     var(--vespa-nevoa);
+  --color-vespa-azul-link: var(--vespa-azul-link);
+  --color-vespa-cripto:    var(--vespa-cripto);
+  --color-vespa-firewall:  var(--vespa-firewall);
+  --color-vespa-circuito:  var(--vespa-circuito);
+  --color-vespa-cobre:     var(--vespa-cobre);
+
+  /* ===== SHADCN COMPATIBILITY (used by shadcn/ui components) ===== */
+  --color-background:           var(--background);
+  --color-foreground:           var(--foreground);
+  --color-card:                 var(--card);
+  --color-card-foreground:      var(--card-foreground);
+  --color-popover:              var(--popover);
+  --color-popover-foreground:   var(--popover-foreground);
+  --color-primary:              var(--primary);
+  --color-primary-foreground:   var(--primary-foreground);
+  --color-secondary:            var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:                var(--muted);
+  --color-muted-foreground:     var(--muted-foreground);
+  --color-accent:               var(--accent);
+  --color-accent-foreground:    var(--accent-foreground);
+  --color-destructive:          var(--destructive);
+  --color-border:               var(--border);
+  --color-input:                var(--input);
+  --color-ring:                 var(--ring);
+
+  /* ===== BORDER RADIUS ===== */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* ===== TYPOGRAPHY ===== */
+  /* TODO: adicionar Azonix.woff2 em public/fonts/ para --font-display real */
+  --font-sans:    var(--font-montserrat);
+  --font-mono:    var(--font-jetbrains);
+  --font-body:    var(--font-montserrat);
+  --font-display: var(--font-montserrat);
+}
+
+:root {
+  /* ===== VESPAS BRAND PRIMITIVES ===== */
+  --vespa-grafite:   #2e2e2e;
+  --vespa-esmeralda: #39ff14;
+  --vespa-nevoa:     #d9e2ec;
+  --vespa-azul-link: #0d70ce;
+  --vespa-cripto:    #1f4e79;
+  --vespa-firewall:  #27746e;
+  --vespa-circuito:  #649f17;
+  --vespa-cobre:     #ad550a;
+
+  /* ===== VESPAS SEMANTIC TOKENS ===== */
+  --color-bg:           var(--vespa-grafite);
+  --color-bg-card:      #1a1a1a;
+  --color-bg-elevated:  #3a3a3a;
+  --color-text-primary:    var(--vespa-nevoa);
+  --color-text-secondary:  #8899a8;
+  --color-text-disabled:   #4a4a4a;
+  --color-accent-vespa:    var(--vespa-esmeralda);
+  --color-accent-glow:     rgba(57, 255, 20, 0.25);
+  --color-primary-vespa:   var(--vespa-azul-link);
+  --color-safe:            var(--vespa-firewall);
+  --color-danger:          var(--vespa-cobre);
+  --color-border-subtle:   rgba(212, 226, 236, 0.12);
+  --color-border-strong:   rgba(212, 226, 236, 0.28);
+
+  /* ===== SHADCN RUNTIME VARIABLES (mapped to VESPAS palette) ===== */
+  --background:           var(--vespa-grafite);
+  --foreground:           var(--vespa-nevoa);
+  --card:                 #1a1a1a;
+  --card-foreground:      var(--vespa-nevoa);
+  --popover:              #1a1a1a;
+  --popover-foreground:   var(--vespa-nevoa);
+  --primary:              var(--vespa-azul-link);
+  --primary-foreground:   var(--vespa-nevoa);
+  --secondary:            #3a3a3a;
+  --secondary-foreground: var(--vespa-nevoa);
+  --muted:                #3a3a3a;
+  --muted-foreground:     #8899a8;
+  --accent:               #3a3a3a;
+  --accent-foreground:    var(--vespa-nevoa);
+  --destructive:          var(--vespa-cobre);
+  --border:               rgba(212, 226, 236, 0.12);
+  --input:                rgba(212, 226, 236, 0.12);
+  --ring:                 var(--vespa-azul-link);
+  --radius:               0.5rem;
+
+  /* ===== TYPOGRAPHY SCALE ===== */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.875rem;
+  --text-4xl:  2.25rem;
+
+  /* ===== EFFECTS ===== */
+  --glow-esmeralda:
+    0 0 8px var(--color-accent-glow),
+    0 0 24px var(--color-accent-glow),
+    0 0 48px rgba(57, 255, 20, 0.1);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: var(--ring);
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+    font-family: var(--font-body, 'Montserrat', sans-serif);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Foco visível em linha com identidade VESPAS — WCAG 2.1 AA */
+  :focus-visible {
+    outline: 2px solid var(--vespa-esmeralda);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
