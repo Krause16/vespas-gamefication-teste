@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Montserrat, JetBrains_Mono } from 'next/font/google'
+import { Toaster } from 'sonner'
 // TODO: adicionar public/fonts/Azonix.woff2 e descomentar para ativar a fonte display
 // import localFont from 'next/font/local'
 import './globals.css'
@@ -38,7 +39,20 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${montserrat.variable} ${jetbrainsMono.variable} h-full`}
     >
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+          {children}
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              style: {
+                background: 'var(--color-bg-card)',
+                color: 'var(--vespa-nevoa)',
+                border: '1px solid var(--border)',
+                fontFamily: 'var(--font-montserrat)',
+              },
+            }}
+          />
+        </body>
     </html>
   )
 }
