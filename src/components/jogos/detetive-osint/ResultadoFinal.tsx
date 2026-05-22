@@ -22,7 +22,7 @@ interface ResultadoFinalProps {
 
 export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
   const router = useRouter()
-  const { jogador_id, atualizarPontuacao: atualizarPontuacaoStore } = useSessaoStore()
+  const { jogador_id, atualizarPontuacao: atualizarPontuacaoStore, concluirJogo } = useSessaoStore()
   const [salvando, setSalvando] = useState(false)
   const [pontuacaoFinal, setPontuacaoFinal] = useState(0)
 
@@ -70,6 +70,7 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
         })
         await atualizarPontuacao(jogador_id, pts)
         atualizarPontuacaoStore(pts)
+        concluirJogo('detetive-osint')
       } catch {
         // Erro silencioso — o aluno ainda vê o resultado
       } finally {

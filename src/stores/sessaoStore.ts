@@ -7,6 +7,7 @@ interface SessaoState {
   pontuacao_total: number
   sala_id: string
   jogador_id: string
+  jogos_concluidos: string[]
 }
 
 interface SessaoActions {
@@ -17,6 +18,7 @@ interface SessaoActions {
     jogador_id: string
   ) => void
   atualizarPontuacao: (delta: number) => void
+  concluirJogo: (slug: string) => void
   sair: () => void
 }
 
@@ -26,6 +28,7 @@ const ESTADO_INICIAL: SessaoState = {
   pontuacao_total: 0,
   sala_id: '',
   jogador_id: '',
+  jogos_concluidos: [],
 }
 
 // SSR-safe: sessionStorage não existe no Node.js
@@ -58,6 +61,13 @@ export const useSessaoStore = create<SessaoState & SessaoActions>()(
 
       atualizarPontuacao: (delta: number) =>
         set((state) => ({ pontuacao_total: state.pontuacao_total + delta })),
+
+      concluirJogo: (slug: string) =>
+        set((state) => ({
+          jogos_concluidos: state.jogos_concluidos.includes(slug)
+            ? state.jogos_concluidos
+            : [...state.jogos_concluidos, slug],
+        })),
 
       sair: () => {
         set(ESTADO_INICIAL)

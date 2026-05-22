@@ -31,7 +31,7 @@ interface ResultadoFinalProps {
 
 export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
   const router = useRouter()
-  const { jogador_id, atualizarPontuacao: atualizarPontuacaoStore } = useSessaoStore()
+  const { jogador_id, atualizarPontuacao: atualizarPontuacaoStore, concluirJogo } = useSessaoStore()
   const [salvando, setSalvando] = useState(false)
 
   const totalMensagens = estado.respostas.length
@@ -80,10 +80,9 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
             indicadores_mais_perdidos: [],
           },
         })
-        // Atualiza pontuação no DB (ranking realtime)
         await atualizarPontuacao(jogador_id, estado.pontuacao_total)
-        // Atualiza store local
         atualizarPontuacaoStore(estado.pontuacao_total)
+        concluirJogo('golpe-ta-ai')
       } catch {
         // Erro silencioso — o aluno ainda vê o resultado
       } finally {
