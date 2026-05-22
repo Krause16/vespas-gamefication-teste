@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { type EstadoJogo, type OndaMensagem } from '@/types/golpe-ta-ai'
 import { useSessaoStore } from '@/stores/sessaoStore'
 import { salvarSessao } from '@/lib/supabase/sessoes'
+import { atualizarPontuacao } from '@/lib/supabase/jogadores'
 
 const NOMES_ONDAS: Record<OndaMensagem, string> = {
   1: 'Óbvios',
@@ -30,7 +31,7 @@ interface ResultadoFinalProps {
 
 export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
   const router = useRouter()
-  const { jogador_id, atualizarPontuacao } = useSessaoStore()
+  const { jogador_id, atualizarPontuacao: atualizarPontuacaoStore } = useSessaoStore()
   const [salvando, setSalvando] = useState(false)
 
   const totalMensagens = estado.respostas.length
@@ -79,7 +80,10 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
             indicadores_mais_perdidos: [],
           },
         })
-        atualizarPontuacao(estado.pontuacao_total)
+        // Atualiza pontuação no DB (ranking realtime)
+        await atualizarPontuacao(jogador_id, estado.pontuacao_total)
+        // Atualiza store local
+        atualizarPontuacaoStore(estado.pontuacao_total)
       } catch {
         // Erro silencioso — o aluno ainda vê o resultado
       } finally {

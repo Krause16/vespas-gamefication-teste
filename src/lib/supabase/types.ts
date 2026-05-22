@@ -37,6 +37,8 @@ export interface Database {
           apelido: string
           auth_user_id: string
           entrou_em: string
+          equipe: string | null
+          pontuacao_total: number
         }
         Insert: {
           id?: string
@@ -44,6 +46,8 @@ export interface Database {
           apelido: string
           auth_user_id: string
           entrou_em?: string
+          equipe?: string | null
+          pontuacao_total?: number
         }
         Update: {
           id?: string
@@ -51,6 +55,8 @@ export interface Database {
           apelido?: string
           auth_user_id?: string
           entrou_em?: string
+          equipe?: string | null
+          pontuacao_total?: number
         }
         Relationships: [
           {
@@ -103,9 +109,46 @@ export interface Database {
           },
         ]
       }
+      eventos_sala: {
+        Row: {
+          id: string
+          sala_id: string
+          tipo: string
+          payload: Json
+          criado_em: string
+        }
+        Insert: {
+          id?: string
+          sala_id: string
+          tipo: string
+          payload?: Json
+          criado_em?: string
+        }
+        Update: {
+          id?: string
+          sala_id?: string
+          tipo?: string
+          payload?: Json
+          criado_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'eventos_sala_sala_id_fkey'
+            columns: ['sala_id']
+            isOneToOne: false
+            referencedRelation: 'salas'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      incrementar_pontuacao: {
+        Args: { p_jogador_id: string; p_delta: number }
+        Returns: undefined
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }
@@ -115,3 +158,4 @@ export type Sala = Database['public']['Tables']['salas']['Row']
 export type Jogador = Database['public']['Tables']['jogadores']['Row']
 export type JogadorInsert = Database['public']['Tables']['jogadores']['Insert']
 export type SessaoJogo = Database['public']['Tables']['sessoes_jogos']['Row']
+export type EventoSala = Database['public']['Tables']['eventos_sala']['Row']

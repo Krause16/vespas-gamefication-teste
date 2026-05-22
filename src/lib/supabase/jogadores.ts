@@ -14,3 +14,16 @@ export async function criarJogador(dados: JogadorInsert): Promise<Jogador> {
   }
   return data
 }
+
+export async function atualizarPontuacao(
+  jogador_id: string,
+  delta: number
+): Promise<void> {
+  const supabase = createClient()
+  // Incremento atômico via RPC SECURITY DEFINER
+  const { error } = await supabase.rpc('incrementar_pontuacao', {
+    p_jogador_id: jogador_id,
+    p_delta: delta,
+  })
+  if (error) throw new Error(error.message)
+}
