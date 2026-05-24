@@ -8,6 +8,7 @@ interface SessaoState {
   sala_id: string
   jogador_id: string
   jogos_concluidos: string[]
+  modo_solo: boolean
 }
 
 interface SessaoActions {
@@ -17,6 +18,7 @@ interface SessaoActions {
     sala_id: string,
     jogador_id: string
   ) => void
+  entrarSolo: (apelido: string, jogador_id: string) => void
   atualizarPontuacao: (delta: number) => void
   concluirJogo: (slug: string) => void
   sair: () => void
@@ -29,6 +31,7 @@ const ESTADO_INICIAL: SessaoState = {
   sala_id: '',
   jogador_id: '',
   jogos_concluidos: [],
+  modo_solo: false,
 }
 
 // SSR-safe: sessionStorage não existe no Node.js
@@ -41,22 +44,31 @@ const ssrSafeSessionStorage =
         removeItem: () => undefined,
       }
 
+function setCookie(value: string) {
+  if (typeof window !== 'undefined') {
+    document.cookie = `vespas-sessao=${value}; path=/; SameSite=Strict`
+  }
+}
+
+function clearCookie() {
+  if (typeof window !== 'undefined') {
+    document.cookie = 'vespas-sessao=; path=/; max-age=0; SameSite=Strict'
+  }
+}
+
 export const useSessaoStore = create<SessaoState & SessaoActions>()(
   persist(
     (set) => ({
       ...ESTADO_INICIAL,
 
-      entrarNaSala: (
-        codigo: string,
-        apelido: string,
-        sala_id: string,
-        jogador_id: string
-      ) => {
-        set({ codigo_sala: codigo, apelido, pontuacao_total: 0, sala_id, jogador_id })
-        // Cookie espelho para o proxy Next.js — sem Max-Age = sessão do browser
-        if (typeof window !== 'undefined') {
-          document.cookie = `vespas-sessao=${codigo}; path=/; SameSite=Strict`
-        }
+      entrarNaSala: (codigo, apelido, sala_id, jogador_id) => {
+        set({ codigo_sala: codigo, apelido, pontuacao_total: 0, sala_id, jogador_id, modo_solo: false })
+        setCookie(codigo)
+      },
+
+      entrarSolo: (apelido, jogador_id) => {
+        set({ codigo_sala: '', apelido, pontuacao_total: 0, sala_id: '', jogador_id, modo_solo: true, jogos_concluidos: [] })
+        setCookie('SOLO')
       },
 
       atualizarPontuacao: (delta: number) =>
@@ -71,9 +83,7 @@ export const useSessaoStore = create<SessaoState & SessaoActions>()(
 
       sair: () => {
         set(ESTADO_INICIAL)
-        if (typeof window !== 'undefined') {
-          document.cookie = 'vespas-sessao=; path=/; max-age=0; SameSite=Strict'
-        }
+        clearCookie()
       },
     }),
     {

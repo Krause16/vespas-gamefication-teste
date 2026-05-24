@@ -12,6 +12,7 @@ export default function HubPage() {
   useLenis()
   const { jogos, apelido, pontuacao_total, handleJogoClick } = useHubJogos()
   const codigo_sala = useSessaoStore((s) => s.codigo_sala)
+  const modo_solo = useSessaoStore((s) => s.modo_solo)
   const jogos_concluidos = useSessaoStore((s) => s.jogos_concluidos)
 
   return (
@@ -68,7 +69,7 @@ export default function HubPage() {
             {apelido || 'Agente'}
           </span>
 
-          {codigo_sala && (
+          {codigo_sala && !modo_solo && (
             <motion.span
               className="flex items-center gap-1.5"
               initial={{ opacity: 0, x: 8 }}
@@ -86,6 +87,20 @@ export default function HubPage() {
                 AO VIVO
               </span>
             </motion.span>
+          )}
+
+          {modo_solo && (
+            <span
+              className="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em]"
+              style={{
+                background: 'rgba(13,112,206,0.3)',
+                border: '1px solid rgba(13,112,206,0.5)',
+                color: '#0d70ce',
+              }}
+              aria-label="Modo solo ativo"
+            >
+              SOLO
+            </span>
           )}
         </div>
       </header>

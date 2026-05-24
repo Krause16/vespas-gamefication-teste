@@ -12,7 +12,16 @@
       "Bash(npm install *)",
       "Bash(Get-ChildItem \"C:\\\\Users\\\\nicho\\\\Downloads\\\\vespas-tmp\" -Recurse -Name)",
       "Bash(node -e \"const p=require\\('./package.json'\\); const deps={...p.dependencies,...p.devDependencies}; ['framer-motion','motion','lenis','@studio-freight/lenis'].forEach\\(k=>console.log\\(k,':', deps[k]||'NOT INSTALLED'\\)\\)\")",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(cat next.config.ts)",
+      "Bash(cat next.config.js)",
+      "Bash(cat src/middleware.ts)",
+      "Bash(cat src/app/middleware.ts)",
+      "Bash(ls public/)",
+      "Bash(cat src/lib/supabase/auth.ts)",
+      "Bash(ls src/lib/supabase/)",
+      "Bash(node -e \"require\\('next-pwa'\\); console.log\\('next-pwa OK'\\)\")",
+      "Bash(node -e \"const p = require\\('next-pwa'\\); console.log\\(typeof p\\)\")"
     ]
   }
 }

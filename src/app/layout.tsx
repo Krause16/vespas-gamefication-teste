@@ -21,12 +21,18 @@ export const metadata: Metadata = {
   title: 'VESPAS — Plataforma de Cibersegurança',
   description:
     'Plataforma gamificada de cibersegurança para oficinas em escolas — UTFPR Curitiba',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'VESPAS',
+  },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#2e2e2e',
+  themeColor: '#0a0a0a',
 }
 
 export default function RootLayout({
@@ -39,20 +45,26 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${montserrat.variable} ${jetbrainsMono.variable} h-full`}
     >
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+      </head>
       <body className="min-h-full antialiased">
-          {children}
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              style: {
-                background: 'var(--color-bg-card)',
-                color: 'var(--vespa-nevoa)',
-                border: '1px solid var(--border)',
-                fontFamily: 'var(--font-montserrat)',
-              },
-            }}
-          />
-        </body>
+        {children}
+        <Toaster
+          position="bottom-center"
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: 'rgba(13,13,13,0.95)',
+              color: '#d9e2ec',
+              border: '1px solid rgba(57,255,20,0.15)',
+              fontFamily: 'var(--font-jetbrains)',
+              fontSize: '13px',
+              backdropFilter: 'blur(20px)',
+            },
+          }}
+        />
+      </body>
     </html>
   )
 }

@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { GolpeTaAiGame } from '@/components/jogos/golpe-ta-ai/GolpeTaAiGame'
-import { DetetiveOsintGame } from '@/components/jogos/detetive-osint/DetetiveOsintGame'
-import { TerminalCTFGame } from '@/components/jogos/terminal-ctf/TerminalCTFGame'
+import { JogoLoader } from '@/components/jogos/JogoLoader'
+
+const SLUGS_VALIDOS = ['golpe-ta-ai', 'detetive-osint', 'terminal-ctf']
 
 interface JogoPageProps {
   params: Promise<{ slug: string }>
@@ -10,16 +10,8 @@ interface JogoPageProps {
 export default async function JogoPage({ params }: JogoPageProps) {
   const { slug } = await params
 
-  if (slug === 'golpe-ta-ai') {
-    return <GolpeTaAiGame />
-  }
-
-  if (slug === 'detetive-osint') {
-    return <DetetiveOsintGame />
-  }
-
-  if (slug === 'terminal-ctf') {
-    return <TerminalCTFGame />
+  if (SLUGS_VALIDOS.includes(slug)) {
+    return <JogoLoader slug={slug} />
   }
 
   return (

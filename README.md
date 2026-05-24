@@ -1,36 +1,119 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VESPAS — Plataforma de Cibersegurança
 
-## Getting Started
+Plataforma web gamificada de cibersegurança desenvolvida para o projeto de extensão **VESPAS** (Vanguarda de Estudos em Segurança, Privacidade e Ameaças em Sistemas) da **UTFPR — Câmpus Curitiba**.
 
-First, run the development server:
+Ferramenta utilizada em oficinas em escolas públicas de Ensino Fundamental II e Médio, ensinando cibersegurança por meio de jogos interativos.
+
+---
+
+## Stack tecnológica
+
+| Camada | Tecnologia |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Linguagem | TypeScript 5 (strict) |
+| Estilização | Tailwind CSS v4 |
+| Animação | motion/react (Framer Motion 12) |
+| Estado global | Zustand 5 |
+| Backend/Auth | Supabase (auth anônima + RLS) |
+| PWA | next-pwa |
+| Terminal (Jogo 3) | xterm.js |
+| Testes unitários | Vitest |
+| Testes E2E | Playwright |
+
+---
+
+## Como rodar localmente
+
+**1. Clone e instale:**
+
+```bash
+git clone <url-do-repo>
+cd vespas-docs
+npm install
+```
+
+**2. Configure variáveis de ambiente:**
+
+```bash
+cp .env.example .env.local
+# Edite .env.local com suas credenciais do Supabase
+```
+
+**3. Inicie o banco de dados local (opcional):**
+
+```bash
+npx supabase start
+npx supabase db reset
+```
+
+**4. Rode o servidor de desenvolvimento:**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Comandos disponíveis
 
-## Learn More
+```bash
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build de produção
+npm run start        # Servidor de produção (após build)
+npm run lint         # ESLint
+npm run type-check   # TypeScript sem emissão
+npm run test         # Testes unitários (Vitest)
+npx playwright test  # Testes E2E (requer servidor ativo)
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Estrutura de pastas resumida
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── (publico)/entrar/   # Entrada por código de sala
+│   ├── (publico)/solo/     # Modo solo (sem gincana)
+│   ├── (aluno)/hub/        # Hub de missões do aluno
+│   ├── (aluno)/jogos/      # Rota dinâmica dos jogos
+│   └── (instrutor)/sala/   # Painel do instrutor
+├── components/
+│   ├── vespas/             # Componentes de marca (HexGrid, DesignSystem...)
+│   ├── jogos/              # Componentes dos jogos
+│   └── ui/                 # Componentes base (shadcn/ui)
+├── lib/
+│   ├── supabase/           # Cliente, auth, jogadores, sessões
+│   └── jogos/              # Lógica de negócio de cada jogo
+├── stores/                 # Zustand stores
+├── types/                  # Tipos TypeScript do domínio
+└── hooks/                  # Hooks customizados
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deploy na Vercel
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Importe o repositório em [vercel.com](https://vercel.com)
+2. Adicione as variáveis de ambiente (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+3. Deploy automático a cada push na branch `main`
+
+---
+
+## Jogos disponíveis
+
+| Jogo | Slug | Descrição |
+|---|---|---|
+| O Golpe Tá Aí | `golpe-ta-ai` | Smartphone simulado com 5 apps — detecte mensagens fraudulentas |
+| Detetive OSINT | `detetive-osint` | Investigue a pegada digital de um perfil público |
+| Terminal CTF | `terminal-ctf` | Desafio em terminal Unix — capture as flags |
+
+---
+
+## Créditos
+
+**VESPAS — UTFPR Câmpus Curitiba**
+Projeto de extensão universitária em Segurança, Privacidade e Ameaças em Sistemas.
