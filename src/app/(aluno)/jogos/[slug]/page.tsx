@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { GolpeTaAiGame } from '@/components/jogos/golpe-ta-ai/GolpeTaAiGame'
 import { DetetiveOsintGame } from '@/components/jogos/detetive-osint/DetetiveOsintGame'
+import { TerminalCTFGame } from '@/components/jogos/terminal-ctf/TerminalCTFGame'
 
 interface JogoPageProps {
   params: Promise<{ slug: string }>
@@ -15,6 +16,10 @@ export default async function JogoPage({ params }: JogoPageProps) {
 
   if (slug === 'detetive-osint') {
     return <DetetiveOsintGame />
+  }
+
+  if (slug === 'terminal-ctf') {
+    return <TerminalCTFGame />
   }
 
   return (

@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { motion, useSpring, useMotionValueEvent } from 'motion/react'
+import { ChevronRight } from 'lucide-react'
+import { GlassPanel, LiquidButton } from '@/components/vespas/DesignSystem'
 import { type EstadoJogo } from '@/types/detetive-osint'
-import { PISTAS } from '@/lib/jogos/detetive-osint/pistas'
 import { AJUSTES } from '@/lib/jogos/detetive-osint/ajustes'
+import { PISTAS } from '@/lib/jogos/detetive-osint/pistas'
 import { calcularScoreAposAjustes, calcularPontuacaoFinal } from '@/lib/jogos/detetive-osint/score'
 import { useSessaoStore } from '@/stores/sessaoStore'
 import { salvarSessao } from '@/lib/supabase/sessoes'
@@ -15,6 +17,43 @@ const PONTOS_POR_PISTA: Record<string, number> = Object.fromEntries(
   PISTAS.map((p) => [p.id, p.pontos]),
 )
 
+function ScoreCard({
+  titulo,
+  valor,
+  subtitulo,
+  cor,
+  delay,
+}: {
+  titulo: string
+  valor: number
+  subtitulo: string
+  cor: string
+  delay: number
+}) {
+  const spring = useSpring(0, { stiffness: 60, damping: 15 })
+  const [val, setVal] = useState(0)
+  useMotionValueEvent(spring, 'change', (v) => setVal(Math.round(v)))
+
+  useEffect(() => {
+    const t = setTimeout(() => spring.set(valor), delay)
+    return () => clearTimeout(t)
+  }, [spring, valor, delay])
+
+  return (
+    <GlassPanel className="flex flex-col items-center gap-1 p-5 text-center">
+      <p className="font-mono text-[9px] uppercase tracking-[0.25em]" style={{ color: 'rgba(217,226,236,0.35)' }}>
+        {titulo}
+      </p>
+      <motion.span className="font-display text-4xl font-bold" style={{ color: cor }}>
+        {val}%
+      </motion.span>
+      <p className="text-xs leading-snug" style={{ color: 'rgba(217,226,236,0.45)' }}>
+        {subtitulo}
+      </p>
+    </GlassPanel>
+  )
+}
+
 interface ResultadoFinalProps {
   estado: EstadoJogo
   onVoltar: () => void
@@ -23,16 +62,16 @@ interface ResultadoFinalProps {
 export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
   const router = useRouter()
   const { jogador_id, atualizarPontuacao: atualizarPontuacaoStore, concluirJogo } = useSessaoStore()
-  const [salvando, setSalvando] = useState(false)
   const [pontuacaoFinal, setPontuacaoFinal] = useState(0)
 
   const scoreAposAjustes = calcularScoreAposAjustes(
     estado.score_exposicao_aluno,
     estado.ajustes_aplicados,
   )
-
   const pctInvestigado = estado.score_exposicao_luna.total
   const pctExpostoRestante = scoreAposAjustes.total
+
+  const exposureColor = pctExpostoRestante < 30 ? '#39ff14' : pctExpostoRestante < 60 ? '#e6b800' : '#ad550a'
 
   const ajustesNaoAplicados = AJUSTES.filter(
     (a) => !estado.ajustes_aplicados.includes(a.id),
@@ -53,7 +92,6 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
       setPontuacaoFinal(pts)
 
       if (!jogador_id) return
-      setSalvando(true)
       try {
         await salvarSessao({
           jogador_id,
@@ -73,8 +111,6 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
         concluirJogo('detetive-osint')
       } catch {
         // Erro silencioso — o aluno ainda vê o resultado
-      } finally {
-        setSalvando(false)
       }
     }
     void salvar()
@@ -89,124 +125,89 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
   return (
     <div
       className="flex min-h-screen flex-col items-center justify-center px-5 py-10"
-      style={{ background: 'var(--vespa-grafite)' }}
+      style={{ background: '#0a0a0a' }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-sm"
+        className="flex w-full max-w-sm flex-col gap-5"
       >
-        <p
-          className="mb-6 text-center font-mono text-xs font-bold tracking-[0.3em]"
-          style={{ color: 'var(--vespa-esmeralda)' }}
-        >
-          MISSÃO CONCLUÍDA
-        </p>
-
-        {/* Pontuação */}
-        <div className="mb-6 flex justify-center">
-          <div
-            className="flex h-28 w-28 flex-col items-center justify-center"
-            style={{
-              clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
-              background: 'var(--vespa-esmeralda)',
-            }}
-            aria-label={`Pontuação: ${pontuacaoFinal} pontos`}
-          >
-            <span className="text-xl font-bold" style={{ color: '#111' }}>
-              {pontuacaoFinal}
-            </span>
-            <span className="text-[10px] font-bold" style={{ color: '#111' }}>
-              pts
-            </span>
-          </div>
+        {/* Title */}
+        <div className="text-center">
+          <p className="font-mono text-[9px] uppercase tracking-[0.35em]" style={{ color: 'rgba(57,255,20,0.5)' }}>
+            MISSÃO CONCLUÍDA
+          </p>
+          <p className="mt-1 font-display text-2xl" style={{ color: '#d9e2ec', letterSpacing: '-0.02em' }}>
+            DETETIVE OSINT
+          </p>
+          <p className="mt-1 font-mono text-sm font-bold" style={{ color: '#39ff14' }}>
+            {pontuacaoFinal} pts
+          </p>
         </div>
 
-        {/* Dois cards lado a lado */}
-        <div className="mb-5 grid grid-cols-2 gap-3">
-          <div
-            className="rounded-xl p-4 text-center"
-            style={{
-              background: 'var(--color-bg-card)',
-              border: '1px solid var(--color-border-subtle)',
-            }}
-          >
-            <p
-              className="mb-1 font-mono text-2xl font-bold"
-              style={{ color: 'var(--vespa-cobre)' }}
-            >
-              {pctInvestigado}%
-            </p>
-            <p className="text-xs leading-tight" style={{ color: 'var(--color-text-secondary)' }}>
-              alvo exposto como investigador
-            </p>
-          </div>
-
-          <div
-            className="rounded-xl p-4 text-center"
-            style={{
-              background: 'var(--color-bg-card)',
-              border: '1px solid var(--color-border-subtle)',
-            }}
-          >
-            <p
-              className="mb-1 font-mono text-2xl font-bold"
-              style={{
-                color:
-                  pctExpostoRestante < 30
-                    ? 'var(--vespa-firewall)'
-                    : pctExpostoRestante < 60
-                      ? '#e6b800'
-                      : 'var(--vespa-cobre)',
-              }}
-            >
-              {pctExpostoRestante}%
-            </p>
-            <p className="text-xs leading-tight" style={{ color: 'var(--color-text-secondary)' }}>
-              sua exposição restante
-            </p>
-          </div>
+        {/* Two score panels side-by-side */}
+        <div className="grid grid-cols-2 gap-3">
+          <ScoreCard
+            titulo="Alvo investigado"
+            valor={pctInvestigado}
+            subtitulo="exposto como investigador"
+            cor="#ad550a"
+            delay={300}
+          />
+          <ScoreCard
+            titulo="Sua exposição"
+            valor={pctExpostoRestante}
+            subtitulo="exposição restante"
+            cor={exposureColor}
+            delay={600}
+          />
         </div>
 
-        {/* Ações da vida real */}
+        {/* Actions section */}
         {ajustesNaoAplicados.length > 0 && (
-          <div
-            className="mb-5 rounded-xl p-4"
-            style={{
-              background: 'var(--color-bg-card)',
-              border: '1px solid var(--color-border-subtle)',
-            }}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
           >
-            <p
-              className="mb-3 text-[10px] font-bold tracking-[0.2em]"
-              style={{ color: 'var(--color-text-secondary)' }}
-            >
-              SUAS PRÓXIMAS AÇÕES NA VIDA REAL
-            </p>
-            <div className="flex flex-col gap-2">
-              {ajustesNaoAplicados.map((a) => (
-                <div key={a.id} className="flex items-start gap-2">
-                  <span className="mt-0.5 flex-shrink-0 text-xs" style={{ color: 'var(--vespa-azul-link)' }}>
-                    →
-                  </span>
-                  <p className="text-xs leading-relaxed" style={{ color: 'var(--vespa-nevoa)' }}>
-                    {a.acao_real}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+            <GlassPanel className="p-5">
+              <p className="mb-3 font-mono text-[9px] uppercase tracking-[0.25em]" style={{ color: 'rgba(217,226,236,0.35)' }}>
+                AÇÕES PARA HOJE
+              </p>
+              <div className="flex flex-col gap-2.5">
+                {ajustesNaoAplicados.map((a, i) => (
+                  <motion.div
+                    key={a.id}
+                    className="flex items-start gap-2"
+                    initial={{ x: -12, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.6 + i * 0.08 }}
+                  >
+                    <ChevronRight
+                      size={12}
+                      style={{ color: '#0d70ce', marginTop: 3, flexShrink: 0 }}
+                      aria-hidden="true"
+                    />
+                    <p className="text-xs leading-relaxed" style={{ color: 'rgba(217,226,236,0.6)' }}>
+                      {a.acao_real}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </GlassPanel>
+          </motion.div>
         )}
 
-        <button
-          onClick={handleVoltar}
-          disabled={salvando}
-          className="w-full rounded-xl py-3.5 text-sm font-bold tracking-[0.15em] transition-opacity hover:opacity-90 disabled:opacity-60"
-          style={{ background: 'var(--vespa-azul-link)', color: 'var(--vespa-nevoa)' }}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
         >
-          VOLTAR AO HUB
-        </button>
+          <LiquidButton variant="primary" size="md" className="w-full" onClick={handleVoltar}>
+            Voltar ao hub
+          </LiquidButton>
+        </motion.div>
       </motion.div>
     </div>
   )

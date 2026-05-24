@@ -12,23 +12,31 @@ export type IndicadorFraude =
   | 'dominio_falso'
   | 'numero_desconhecido'
 
-export type CanalMensagem = 'whatsapp' | 'instagram' | 'email' | 'sms'
+export type AppSlug = 'vespas-msg' | 'vespasgram' | 'vmail' | 'vlinked' | 'vcord'
 
+// Kept for backward compatibility (TransicaoOnda and tests)
 export type OndaMensagem = 1 | 2 | 3 | 4
+export type CanalMensagem = 'whatsapp' | 'instagram' | 'email' | 'sms'
 
 export interface Mensagem {
   id: string
-  onda: OndaMensagem
-  canal: CanalMensagem
+  app: AppSlug
   remetente: {
     nome: string
     avatar?: string
     verificado: boolean
     contato_salvo: boolean
     numero_ou_email: string
+    // App-specific metadata
+    cargo?: string          // vlinked: job title
+    empresa?: string        // vlinked: company
+    discriminator?: string  // vcord: e.g. "#0001"
+    cargo_servidor?: string // vcord: server role
+    followers?: number      // vespasgram
   }
   conteudo: {
     texto: string
+    assunto?: string    // vmail: email subject
     link?: string
     link_real?: string
     audio?: boolean
@@ -63,10 +71,12 @@ export interface ResultadoMensagem {
 }
 
 export interface EstadoJogo {
-  fase: 'intro' | 'jogando' | 'debriefing' | 'transicao_onda' | 'resultado_final'
-  onda_atual: OndaMensagem
-  mensagem_atual_idx: number
-  mensagens_da_onda: Mensagem[]
+  fase: 'intro' | 'smartphone' | 'em_app' | 'classificando' | 'debriefing' | 'resultado_final'
+  app_atual: AppSlug | null
+  mensagem_atual_id: string | null
+  mensagens_completadas: string[]
+  meta_completar: number   // 10
+  total_mensagens: number  // 15
   respostas: RespostaJogador[]
   resultados: ResultadoMensagem[]
   pontuacao_total: number

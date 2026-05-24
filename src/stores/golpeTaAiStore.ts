@@ -1,19 +1,23 @@
 import { create } from 'zustand'
 import {
+  type AppSlug,
   type ClassificacaoMensagem,
   type EstadoJogo,
   type IndicadorFraude,
-  type OndaMensagem,
   type RespostaJogador,
 } from '@/types/golpe-ta-ai'
-import { getMensagensDaOnda } from '@/lib/jogos/golpe-ta-ai/mensagens'
+import { getMensagem } from '@/lib/jogos/golpe-ta-ai/mensagens'
 import { calcularPontuacaoMensagem } from '@/lib/jogos/golpe-ta-ai/pontuacao'
+
+const BONUS_ANALISE_COMPLETA = 200
 
 const ESTADO_INICIAL: EstadoJogo = {
   fase: 'intro',
-  onda_atual: 1,
-  mensagem_atual_idx: 0,
-  mensagens_da_onda: [],
+  app_atual: null,
+  mensagem_atual_id: null,
+  mensagens_completadas: [],
+  meta_completar: 10,
+  total_mensagens: 15,
   respostas: [],
   resultados: [],
   pontuacao_total: 0,
@@ -23,111 +27,116 @@ const ESTADO_INICIAL: EstadoJogo = {
 interface GolpeTaAiStore {
   estado: EstadoJogo
   indicadores_selecionados: IndicadorFraude[]
+  classificacao_selecionada: ClassificacaoMensagem | null
   tempo_inicio_mensagem: number
 
-  toggleIndicador: (indicador: IndicadorFraude) => void
   iniciarJogo: () => void
-  responderMensagem: (classificacao: ClassificacaoMensagem) => void
-  proximaMensagem: () => void
-  proximaOnda: () => void
+  abrirApp: (app: AppSlug) => void
+  fecharApp: () => void
+  abrirMensagem: (id: string) => void
+  fecharClassificacao: () => void
+  toggleIndicador: (indicador: IndicadorFraude) => void
+  selecionarClassificacao: (c: ClassificacaoMensagem) => void
+  confirmarClassificacao: () => void
+  fecharDebriefing: () => void
+  verResultado: () => void
   resetar: () => void
 }
 
 export const useGolpeTaAiStore = create<GolpeTaAiStore>((set, get) => ({
   estado: ESTADO_INICIAL,
   indicadores_selecionados: [],
+  classificacao_selecionada: 'suspeito',
   tempo_inicio_mensagem: 0,
+
+  iniciarJogo: () => {
+    set({
+      estado: { ...ESTADO_INICIAL, fase: 'smartphone', tempo_inicio: Date.now() },
+      indicadores_selecionados: [],
+      classificacao_selecionada: 'suspeito',
+      tempo_inicio_mensagem: 0,
+    })
+  },
+
+  abrirApp: (app) => {
+    set((s) => ({ estado: { ...s.estado, fase: 'em_app', app_atual: app } }))
+  },
+
+  fecharApp: () => {
+    set((s) => ({ estado: { ...s.estado, fase: 'smartphone', app_atual: null } }))
+  },
+
+  abrirMensagem: (id) => {
+    set((s) => ({
+      estado: { ...s.estado, fase: 'classificando', mensagem_atual_id: id },
+      indicadores_selecionados: [],
+      classificacao_selecionada: 'suspeito',
+      tempo_inicio_mensagem: Date.now(),
+    }))
+  },
+
+  fecharClassificacao: () => {
+    set((s) => ({ estado: { ...s.estado, fase: 'em_app', mensagem_atual_id: null } }))
+  },
 
   toggleIndicador: (indicador) => {
     const atual = get().indicadores_selecionados
-    const jaEstaMarcado = atual.includes(indicador)
     set({
-      indicadores_selecionados: jaEstaMarcado
+      indicadores_selecionados: atual.includes(indicador)
         ? atual.filter((i) => i !== indicador)
         : [...atual, indicador],
     })
   },
 
-  iniciarJogo: () => {
-    const mensagens = getMensagensDaOnda(1)
-    set({
-      estado: {
-        ...ESTADO_INICIAL,
-        fase: 'jogando',
-        mensagens_da_onda: mensagens,
-        tempo_inicio: Date.now(),
-      },
-      indicadores_selecionados: [],
-      tempo_inicio_mensagem: Date.now(),
-    })
+  selecionarClassificacao: (c) => {
+    set({ classificacao_selecionada: c })
   },
 
-  responderMensagem: (classificacao) => {
-    const { estado, indicadores_selecionados, tempo_inicio_mensagem } = get()
-    const mensagemAtual = estado.mensagens_da_onda[estado.mensagem_atual_idx]
+  confirmarClassificacao: () => {
+    const { estado, indicadores_selecionados, classificacao_selecionada, tempo_inicio_mensagem } = get()
+    if (!estado.mensagem_atual_id || !classificacao_selecionada) return
+
+    const mensagem = getMensagem(estado.mensagem_atual_id)
+    if (!mensagem) return
 
     const resposta: RespostaJogador = {
-      mensagem_id: mensagemAtual.id,
-      classificacao,
+      mensagem_id: estado.mensagem_atual_id,
+      classificacao: classificacao_selecionada,
       indicadores_marcados: indicadores_selecionados,
       tempo_decisao_ms: Date.now() - tempo_inicio_mensagem,
     }
 
-    const resultado = calcularPontuacaoMensagem(mensagemAtual, resposta)
+    const resultado = calcularPontuacaoMensagem(mensagem, resposta)
+    const novasCompletadas = [...estado.mensagens_completadas, estado.mensagem_atual_id]
+
+    const bonusAnalise = novasCompletadas.length === estado.total_mensagens ? BONUS_ANALISE_COMPLETA : 0
 
     set({
       estado: {
         ...estado,
         fase: 'debriefing',
+        mensagens_completadas: novasCompletadas,
         respostas: [...estado.respostas, resposta],
         resultados: [...estado.resultados, resultado],
-        pontuacao_total: estado.pontuacao_total + resultado.pontuacao,
+        pontuacao_total: estado.pontuacao_total + resultado.pontuacao + bonusAnalise,
       },
       indicadores_selecionados: [],
     })
   },
 
-  proximaMensagem: () => {
-    const { estado } = get()
-    const nextIdx = estado.mensagem_atual_idx + 1
-
-    if (nextIdx < estado.mensagens_da_onda.length) {
-      set({
-        estado: {
-          ...estado,
-          fase: 'jogando',
-          mensagem_atual_idx: nextIdx,
-        },
-        tempo_inicio_mensagem: Date.now(),
-      })
-    } else if (estado.onda_atual < 4) {
-      set({ estado: { ...estado, fase: 'transicao_onda' } })
-    } else {
-      set({ estado: { ...estado, fase: 'resultado_final' } })
-    }
+  fecharDebriefing: () => {
+    set((s) => ({ estado: { ...s.estado, fase: 'em_app', mensagem_atual_id: null } }))
   },
 
-  proximaOnda: () => {
-    const { estado } = get()
-    const nextOnda = (estado.onda_atual + 1) as OndaMensagem
-    const mensagens = getMensagensDaOnda(nextOnda)
-    set({
-      estado: {
-        ...estado,
-        fase: 'jogando',
-        onda_atual: nextOnda,
-        mensagem_atual_idx: 0,
-        mensagens_da_onda: mensagens,
-      },
-      indicadores_selecionados: [],
-      tempo_inicio_mensagem: Date.now(),
-    })
+  verResultado: () => {
+    set((s) => ({ estado: { ...s.estado, fase: 'resultado_final' } }))
   },
 
   resetar: () => {
     set({
       estado: ESTADO_INICIAL,
       indicadores_selecionados: [],
+      classificacao_selecionada: 'suspeito',
       tempo_inicio_mensagem: 0,
     })
   },

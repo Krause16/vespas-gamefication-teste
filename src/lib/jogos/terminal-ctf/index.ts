@@ -1,0 +1,5 @@
+export { criarFilesystemInicial, getItem, getDiretorioAtual, resolverPath, pathParaString, isArquivo, isDiretorio } from './filesystem'
+export { executarComando } from './comandos'
+export { FLAGS, detectarFlag, calcularBonusVelocidade, PONTOS_POR_FLAG } from './flags'
+export { DICAS, obterProximaDica } from './dicas'
+export { completarTab } from './tabCompletion'

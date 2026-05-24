@@ -2,26 +2,38 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { type EstadoJogo, type OndaMensagem } from '@/types/golpe-ta-ai'
+import { motion, useSpring, useMotionValueEvent } from 'motion/react'
+import { HexGrid } from '@/components/vespas/HexGrid'
+import { TypewriterText, StatBadge, LiquidButton } from '@/components/vespas/DesignSystem'
+import { type AppSlug, type EstadoJogo } from '@/types/golpe-ta-ai'
 import { useSessaoStore } from '@/stores/sessaoStore'
 import { salvarSessao } from '@/lib/supabase/sessoes'
 import { atualizarPontuacao } from '@/lib/supabase/jogadores'
 
-const NOMES_ONDAS: Record<OndaMensagem, string> = {
-  1: 'Óbvios',
-  2: 'Golpes Brasileiros',
-  3: 'Direcionados',
-  4: 'Ataques Pós-IA',
+const NOMES_APPS: Record<AppSlug, string> = {
+  'vespas-msg': 'VespasMsg',
+  'vespasgram':  'Vespasgram',
+  'vmail':       'VMail',
+  'vlinked':     'VLinked',
+  'vcord':       'VCord',
 }
 
-function calcularPrecisaoOnda(estado: EstadoJogo, onda: OndaMensagem): number {
-  const resultadosDaOnda = estado.resultados.filter((_, i) =>
-    estado.respostas[i]?.mensagem_id.startsWith(`M${onda}-`)
+const APP_PREFIXO: Record<AppSlug, string> = {
+  'vespas-msg': 'VM-',
+  'vespasgram':  'VG-',
+  'vmail':       'VE-',
+  'vlinked':     'VL-',
+  'vcord':       'VD-',
+}
+
+function calcularPrecisaoApp(estado: EstadoJogo, app: AppSlug): number {
+  const prefixo = APP_PREFIXO[app]
+  const resultadosDaApp = estado.resultados.filter((_, i) =>
+    estado.respostas[i]?.mensagem_id.startsWith(prefixo)
   )
-  if (resultadosDaOnda.length === 0) return 0
-  const corretos = resultadosDaOnda.filter((r) => r.correta).length
-  return Math.round((corretos / resultadosDaOnda.length) * 100)
+  if (resultadosDaApp.length === 0) return 0
+  const corretos = resultadosDaApp.filter((r) => r.correta).length
+  return Math.round((corretos / resultadosDaApp.length) * 100)
 }
 
 interface ResultadoFinalProps {
@@ -32,40 +44,40 @@ interface ResultadoFinalProps {
 export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
   const router = useRouter()
   const { jogador_id, atualizarPontuacao: atualizarPontuacaoStore, concluirJogo } = useSessaoStore()
-  const [salvando, setSalvando] = useState(false)
+  const [titleDone, setTitleDone] = useState(false)
 
   const totalMensagens = estado.respostas.length
   const corretas = estado.resultados.filter((r) => r.correta).length
   const precisaoGeral = totalMensagens > 0 ? Math.round((corretas / totalMensagens) * 100) : 0
-
-  const precisoesPorOnda: Record<OndaMensagem, number> = {
-    1: calcularPrecisaoOnda(estado, 1),
-    2: calcularPrecisaoOnda(estado, 2),
-    3: calcularPrecisaoOnda(estado, 3),
-    4: calcularPrecisaoOnda(estado, 4),
-  }
-
-  const melhorOnda = (Object.entries(precisoesPorOnda) as [string, number][]).reduce(
-    (best, cur) => (cur[1] > best[1] ? cur : best),
-    ['1', -1]
-  )[0] as unknown as OndaMensagem
-
-  const piorOnda = (Object.entries(precisoesPorOnda) as [string, number][]).reduce(
-    (worst, cur) => (cur[1] < worst[1] ? cur : worst),
-    ['1', 101]
-  )[0] as unknown as OndaMensagem
-
   const fraudesDetectadas = estado.resultados.filter(
     (r, i) => r.correta && estado.respostas[i]?.classificacao !== 'confio'
   ).length
 
-  useEffect(() => {
-    // Date.now() permitido em useEffect (side effect explícito)
-    const duracaoSegundos = Math.round((Date.now() - estado.tempo_inicio) / 1000)
+  const APPS: AppSlug[] = ['vespas-msg', 'vespasgram', 'vmail', 'vlinked', 'vcord']
+  const precisoesPorApp = Object.fromEntries(
+    APPS.map((app) => [app, calcularPrecisaoApp(estado, app)])
+  ) as Record<AppSlug, number>
 
+  const melhorApp = APPS.reduce<AppSlug>(
+    (best, app) => precisoesPorApp[app] > precisoesPorApp[best] ? app : best,
+    'vespas-msg'
+  )
+
+  const scoreSpring = useSpring(0, { stiffness: 60, damping: 15 })
+  const [scoreDisplay, setScoreDisplay] = useState(0)
+  useMotionValueEvent(scoreSpring, 'change', (v) => setScoreDisplay(Math.round(v)))
+
+  useEffect(() => {
+    if (titleDone) {
+      const t = setTimeout(() => scoreSpring.set(estado.pontuacao_total), 300)
+      return () => clearTimeout(t)
+    }
+  }, [titleDone, scoreSpring, estado.pontuacao_total])
+
+  useEffect(() => {
+    const duracaoSegundos = Math.round((Date.now() - estado.tempo_inicio) / 1000)
     async function salvar() {
       if (!jogador_id) return
-      setSalvando(true)
       try {
         await salvarSessao({
           jogador_id,
@@ -73,10 +85,11 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
           pontuacao: estado.pontuacao_total,
           duracao_segundos: duracaoSegundos,
           metadata: {
-            precisao_onda_1: precisoesPorOnda[1],
-            precisao_onda_2: precisoesPorOnda[2],
-            precisao_onda_3: precisoesPorOnda[3],
-            precisao_onda_4: precisoesPorOnda[4],
+            precisao_vespas_msg: precisoesPorApp['vespas-msg'],
+            precisao_vespasgram: precisoesPorApp['vespasgram'],
+            precisao_vmail:      precisoesPorApp['vmail'],
+            precisao_vlinked:    precisoesPorApp['vlinked'],
+            precisao_vcord:      precisoesPorApp['vcord'],
             indicadores_mais_perdidos: [],
           },
         })
@@ -85,8 +98,6 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
         concluirJogo('golpe-ta-ai')
       } catch {
         // Erro silencioso — o aluno ainda vê o resultado
-      } finally {
-        setSalvando(false)
       }
     }
     void salvar()
@@ -100,95 +111,105 @@ export function ResultadoFinal({ estado, onVoltar }: ResultadoFinalProps) {
 
   return (
     <div
-      className="flex min-h-screen flex-col items-center justify-center px-6 py-10"
-      style={{ background: 'var(--vespa-grafite)' }}
+      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-10"
+      style={{ background: '#000000' }}
     >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-sm"
-      >
-        <p
-          className="mb-6 text-center text-xs font-bold tracking-[0.3em]"
-          style={{ color: 'var(--vespa-esmeralda)' }}
-        >
-          MISSÃO CONCLUÍDA
-        </p>
+      <HexGrid density="low" interactive={false} />
 
-        {/* Pontuação em hexágono */}
-        <div className="mb-8 flex flex-col items-center">
-          <div
-            className="flex h-28 w-28 items-center justify-center"
-            style={{
-              clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
-              background: 'var(--vespa-esmeralda)',
-            }}
-            aria-label={`Pontuação: ${estado.pontuacao_total} pontos`}
-          >
-            <span className="text-xl font-bold" style={{ color: '#111' }}>
-              {estado.pontuacao_total}
-            </span>
-          </div>
-          <p className="mt-2 text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            pts
+      <div className="relative z-10 flex w-full max-w-sm flex-col items-center gap-8">
+        {/* Title */}
+        <div className="text-center">
+          <p className="mb-2 font-mono text-[9px] uppercase tracking-[0.35em]" style={{ color: 'rgba(57,255,20,0.5)' }}>
+            MISSÃO
           </p>
+          <TypewriterText
+            text="OPERAÇÃO CONCLUÍDA"
+            speed={50}
+            color="#39ff14"
+            onComplete={() => setTitleDone(true)}
+            className="font-display text-2xl tracking-[-0.02em]"
+          />
         </div>
 
-        {/* Estatísticas */}
-        <div
-          className="mb-6 rounded-xl p-5"
-          style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border-subtle)' }}
-        >
-          <Stat label="Precisão geral" valor={`${precisaoGeral}%`} />
-          <Stat label="Melhor categoria" valor={NOMES_ONDAS[melhorOnda]} />
-          <Stat label="Atenção necessária" valor={NOMES_ONDAS[piorOnda]} />
-        </div>
+        {/* Score */}
+        {titleDone && (
+          <motion.div
+            className="flex flex-col items-center"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          >
+            <div
+              className="flex h-28 w-28 items-center justify-center"
+              style={{
+                clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)',
+                background: '#39ff14',
+                boxShadow: '0 0 40px rgba(57,255,20,0.4)',
+              }}
+              aria-label={`Pontuação: ${estado.pontuacao_total} pontos`}
+            >
+              <motion.span className="font-display text-2xl font-bold" style={{ color: '#0a0a0a' }}>
+                {scoreDisplay}
+              </motion.span>
+            </div>
+            <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.25em]" style={{ color: 'rgba(217,226,236,0.4)' }}>
+              pontos
+            </p>
+          </motion.div>
+        )}
 
-        {/* Texto contextual */}
-        <div
-          className="mb-8 rounded-xl p-4 text-sm leading-relaxed"
-          style={{
-            background: 'rgba(57,255,20,0.05)',
-            border: '1px solid rgba(57,255,20,0.15)',
-            color: 'var(--vespa-nevoa)',
-          }}
-        >
-          Das {totalMensagens} mensagens, você detectou corretamente{' '}
-          <strong>{fraudesDetectadas}</strong> tentativas de fraude.{' '}
-          {totalMensagens - corretas > 0 ? (
-            <>
-              <strong>{totalMensagens - corretas}</strong> te enganou
-              {totalMensagens - corretas > 1 ? 'ram' : ''}. No mundo real, isso teria custado
-              tempo, dados ou dinheiro.
-            </>
-          ) : (
-            'Nenhuma te enganou. Excelente!'
-          )}
-        </div>
+        {/* Stats 2×2 */}
+        {titleDone && (
+          <motion.div
+            className="grid w-full grid-cols-2 gap-3"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <StatBadge value={`${precisaoGeral}%`} label="PRECISÃO GERAL" />
+            <StatBadge value={fraudesDetectadas} label="FRAUDES DETECTADAS" />
+            <StatBadge value={`${corretas}/${totalMensagens}`} label="ACERTOS" />
+            <StatBadge value={NOMES_APPS[melhorApp]} label="MELHOR APP" />
+          </motion.div>
+        )}
 
-        <button
-          onClick={handleVoltar}
-          disabled={salvando}
-          className="w-full rounded-lg py-3.5 text-sm font-bold tracking-[0.15em] transition-opacity hover:opacity-90 disabled:opacity-60"
-          style={{ background: 'var(--vespa-azul-link)', color: 'var(--vespa-nevoa)' }}
-        >
-          VOLTAR AO HUB
-        </button>
-      </motion.div>
-    </div>
-  )
-}
+        {/* Impact paragraph */}
+        {titleDone && (
+          <motion.p
+            className="text-center text-sm leading-relaxed"
+            style={{ color: 'rgba(217,226,236,0.55)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            Das {totalMensagens} mensagens analisadas, você detectou corretamente{' '}
+            <span style={{ color: '#d9e2ec', fontWeight: 600 }}>{fraudesDetectadas}</span>{' '}
+            tentativas de fraude.{' '}
+            {totalMensagens - corretas > 0 ? (
+              <>
+                <span style={{ color: '#d9e2ec', fontWeight: 600 }}>{totalMensagens - corretas}</span>{' '}
+                te enganou{totalMensagens - corretas > 1 ? 'ram' : ''}.
+              </>
+            ) : (
+              'Nenhuma te enganou.'
+            )}
+          </motion.p>
+        )}
 
-function Stat({ label, valor }: { label: string; valor: string }) {
-  return (
-    <div className="flex items-center justify-between py-1.5">
-      <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-        {label}
-      </span>
-      <span className="text-sm font-semibold" style={{ color: 'var(--vespa-nevoa)' }}>
-        {valor}
-      </span>
+        {/* CTA */}
+        {titleDone && (
+          <motion.div
+            className="w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+          >
+            <LiquidButton variant="primary" size="md" className="w-full" onClick={handleVoltar}>
+              Voltar ao hub
+            </LiquidButton>
+          </motion.div>
+        )}
+      </div>
     </div>
   )
 }

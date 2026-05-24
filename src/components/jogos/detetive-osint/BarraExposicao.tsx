@@ -3,19 +3,30 @@
 import { motion } from 'framer-motion'
 import { type ScoreExposicao } from '@/types/detetive-osint'
 
-const CATEGORIAS: { key: keyof ScoreExposicao['categorias']; label: string; emoji: string }[] = [
-  { key: 'localizacao', label: 'Localização', emoji: '🏠' },
-  { key: 'rotina', label: 'Rotina', emoji: '⏰' },
-  { key: 'conexoes', label: 'Conexões', emoji: '👥' },
-  { key: 'emocional', label: 'Emocional', emoji: '💭' },
+const CATS: { key: keyof ScoreExposicao['categorias']; label: string }[] = [
+  { key: 'localizacao', label: 'Localização' },
+  { key: 'rotina', label: 'Rotina' },
+  { key: 'conexoes', label: 'Conexões' },
+  { key: 'emocional', label: 'Emocional' },
 ]
 
-function corDoBarra(valor: number, max: number): string {
-  const pct = max > 0 ? valor / max : 0
-  if (pct < 0.3) return 'var(--vespa-firewall)'
-  if (pct < 0.6) return '#e6b800'
-  return 'var(--vespa-cobre)'
+function gaugeColor(total: number): string {
+  if (total < 30) return '#27746e'
+  if (total < 60) return '#ad550a'
+  return '#cc3333'
 }
+
+function gaugeLabel(total: number): string {
+  if (total < 30) return 'BAIXO'
+  if (total < 60) return 'MODERADO'
+  if (total < 80) return 'ALTO'
+  return 'CRÍTICO'
+}
+
+const R = 50
+const CX = 60
+const CY = 62
+const TOTAL_ARC = Math.PI * R // semicircle arc length ≈ 157.08
 
 interface BarraExposicaoProps {
   score: ScoreExposicao
@@ -24,73 +35,76 @@ interface BarraExposicaoProps {
 }
 
 export function BarraExposicao({ score, maxPorCategoria = 25, label }: BarraExposicaoProps) {
+  const filled = TOTAL_ARC * Math.min(100, score.total) / 100
+  const cor = gaugeColor(score.total)
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {label && (
-        <p className="text-[10px] font-bold tracking-[0.2em]" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: 'rgba(217,226,236,0.4)' }}>
           {label}
         </p>
       )}
 
-      {/* Barra total */}
-      <div className="flex items-center gap-3">
-        <span className="w-12 text-right font-mono text-sm font-bold" style={{ color: 'var(--vespa-esmeralda)' }}>
-          {score.total}%
-        </span>
-        <div
-          className="relative h-3 flex-1 overflow-hidden rounded-full"
-          style={{ background: 'var(--color-bg-elevated)' }}
-        >
-          <motion.div
-            className="h-full rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(100, score.total)}%` }}
-            transition={{ duration: 0.6, ease: 'easeOut' }}
-            style={{
-              background:
-                score.total < 30
-                  ? 'var(--vespa-firewall)'
-                  : score.total < 60
-                    ? '#e6b800'
-                    : 'var(--vespa-cobre)',
-              boxShadow: score.total >= 80 ? '0 0 8px rgba(173,85,10,0.6)' : 'none',
-            }}
+      {/* Semicircle gauge */}
+      <div className="flex flex-col items-center">
+        <svg viewBox="0 0 120 70" className="w-full max-w-[180px]" aria-label={`Nível de exposição: ${score.total}%`}>
+          {/* Track */}
+          <path
+            d={`M ${CX - R},${CY} A ${R},${R} 0 0,1 ${CX + R},${CY}`}
+            fill="none"
+            stroke="rgba(217,226,236,0.07)"
+            strokeWidth="8"
+            strokeLinecap="round"
           />
-        </div>
+          {/* Fill */}
+          <motion.path
+            d={`M ${CX - R},${CY} A ${R},${R} 0 0,1 ${CX + R},${CY}`}
+            fill="none"
+            stroke={cor}
+            strokeWidth="8"
+            strokeLinecap="round"
+            style={{ strokeDasharray: TOTAL_ARC }}
+            initial={{ strokeDashoffset: TOTAL_ARC }}
+            animate={{ strokeDashoffset: TOTAL_ARC - filled }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+          />
+          {/* Center value */}
+          <text x={CX} y={CY - 6} textAnchor="middle" fontFamily="var(--font-mono, monospace)" fontSize="18" fontWeight="bold" fill={cor}>
+            {score.total}%
+          </text>
+          <text x={CX} y={CY + 8} textAnchor="middle" fontFamily="var(--font-mono, monospace)" fontSize="7" fill="rgba(217,226,236,0.4)" letterSpacing="2">
+            {gaugeLabel(score.total)}
+          </text>
+        </svg>
+
+        <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.25em]" style={{ color: 'rgba(217,226,236,0.35)' }}>
+          NÍVEL DE EXPOSIÇÃO
+        </p>
       </div>
 
-      {/* Barras por categoria */}
-      <div className="flex flex-col gap-1.5">
-        {CATEGORIAS.map(({ key, label: catLabel, emoji }) => {
-          const valor = score.categorias[key]
+      {/* Category bars */}
+      <div className="flex flex-col gap-2">
+        {CATS.map(({ key, label: catLabel }) => {
+          const val = score.categorias[key]
+          const pct = Math.min(100, (val / maxPorCategoria) * 100)
+          const barColor = gaugeColor((val / maxPorCategoria) * 100)
           return (
             <div key={key} className="flex items-center gap-2">
-              <span className="text-xs" aria-hidden="true">
-                {emoji}
-              </span>
-              <span
-                className="w-20 text-xs"
-                style={{ color: 'var(--color-text-secondary)' }}
-              >
+              <span className="w-18 font-mono text-[10px]" style={{ color: 'rgba(217,226,236,0.4)', minWidth: 72 }}>
                 {catLabel}
               </span>
-              <div
-                className="relative h-1.5 flex-1 overflow-hidden rounded-full"
-                style={{ background: 'var(--color-bg-elevated)' }}
-              >
+              <div className="relative h-1.5 flex-1 overflow-hidden rounded-full" style={{ background: 'rgba(217,226,236,0.05)' }}>
                 <motion.div
-                  className="h-full rounded-full"
+                  className="absolute inset-y-0 left-0 rounded-full"
                   initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(100, (valor / maxPorCategoria) * 100)}%` }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                  style={{ background: corDoBarra(valor, maxPorCategoria) }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  style={{ background: barColor }}
                 />
               </div>
-              <span
-                className="w-6 text-right font-mono text-xs"
-                style={{ color: 'var(--color-text-secondary)' }}
-              >
-                {valor}
+              <span className="font-mono text-[10px] tabular-nums" style={{ color: 'rgba(217,226,236,0.4)', minWidth: 20 }}>
+                {val}
               </span>
             </div>
           )

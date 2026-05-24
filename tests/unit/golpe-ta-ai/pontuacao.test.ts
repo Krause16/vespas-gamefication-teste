@@ -4,8 +4,7 @@ import { type Mensagem, type RespostaJogador } from '../../../src/types/golpe-ta
 
 const mensagemFraude: Mensagem = {
   id: 'TEST-01',
-  onda: 1,
-  canal: 'email',
+  app: 'vmail',
   remetente: {
     nome: 'Banco Falso',
     verificado: false,
@@ -25,8 +24,7 @@ const mensagemFraude: Mensagem = {
 
 const mensagemLegitima: Mensagem = {
   id: 'TEST-02',
-  onda: 1,
-  canal: 'whatsapp',
+  app: 'vespas-msg',
   remetente: {
     nome: 'Escola',
     verificado: false,

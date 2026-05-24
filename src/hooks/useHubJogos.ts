@@ -9,7 +9,7 @@ interface UseHubJogosReturn {
   jogos: ConfigJogo[]
   apelido: string
   pontuacao_total: number
-  handleJogoClick: (jogo: ConfigJogo) => void
+  handleJogoClick: (slug: string) => void
 }
 
 export function useHubJogos(): UseHubJogosReturn {
@@ -17,7 +17,6 @@ export function useHubJogos(): UseHubJogosReturn {
   const apelido = useSessaoStore((state) => state.apelido)
   const pontuacao_total = useSessaoStore((state) => state.pontuacao_total)
   const jogos_concluidos = useSessaoStore((state) => state.jogos_concluidos)
-
   const jogos: ConfigJogo[] = [
     {
       slug: 'golpe-ta-ai',
@@ -25,6 +24,7 @@ export function useHubJogos(): UseHubJogosReturn {
       nivel: 1,
       cor: 'var(--vespa-firewall)',
       disponivel: true,
+      concluido: jogos_concluidos.includes('golpe-ta-ai'),
       icon: 'Shield',
     },
     {
@@ -32,7 +32,8 @@ export function useHubJogos(): UseHubJogosReturn {
       nome: 'DETETIVE OSINT',
       nivel: 2,
       cor: 'var(--vespa-cripto)',
-      disponivel: jogos_concluidos.includes('golpe-ta-ai'),
+      disponivel: true,
+      concluido: jogos_concluidos.includes('detetive-osint'),
       icon: 'Search',
     },
     {
@@ -40,20 +41,22 @@ export function useHubJogos(): UseHubJogosReturn {
       nome: 'TERMINAL CTF',
       nivel: 3,
       cor: 'var(--color-bg-elevated)',
-      disponivel: jogos_concluidos.includes('detetive-osint'),
+      disponivel: true,
+      concluido: jogos_concluidos.includes('terminal-ctf'),
       icon: 'Terminal',
     },
   ]
 
-  function handleJogoClick(jogo: ConfigJogo): void {
-    if (!jogo.disponivel) {
+  function handleJogoClick(slug: string): void {
+    const jogo = jogos.find((j) => j.slug === slug)
+    if (!jogo || !jogo.disponivel) {
       toast('Complete o nível anterior primeiro', {
-        description: `${jogo.nome} está bloqueado`,
+        description: `${jogo?.nome ?? slug} está bloqueado`,
         icon: '🔒',
       })
       return
     }
-    router.push(`/jogos/${jogo.slug}`)
+    router.push(`/jogos/${slug}`)
   }
 
   return { jogos, apelido, pontuacao_total, handleJogoClick }

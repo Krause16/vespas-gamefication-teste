@@ -1,36 +1,56 @@
-import { type Mensagem } from '@/types/golpe-ta-ai'
+import { type Mensagem, type AppSlug } from '@/types/golpe-ta-ai'
 
 export const MENSAGENS: Mensagem[] = [
-  // ─── Onda 1: Óbvios ───────────────────────────────────────────────────────
+  // ─── VESPAS MSG ──────────────────────────────────────────────────────────────
   {
-    id: 'M1-01',
-    onda: 1,
-    canal: 'email',
+    id: 'VM-01',
+    app: 'vespas-msg',
     remetente: {
-      nome: 'Banco Centra1 do Brasil',
-      avatar: 'B',
+      nome: 'Nubank Oficial',
+      avatar: 'N',
       verificado: false,
       contato_salvo: false,
-      numero_ou_email: 'bancoentra1@outlook.com.br',
+      numero_ou_email: '+55 11 91234-5678',
     },
     conteudo: {
-      texto: 'Sua conta foi BLOQUEADA! Clique AGORA em bit.ly/desbloquear-conta-urgente para evitar o cancelamento definitivo em 24h!!!',
-      link: 'bit.ly/desbloquear-conta-urgente',
-      link_real: 'http://phishing-exemplo.com/coletar-dados',
+      texto: 'Seu Pix foi suspenso por atividade suspeita. Acesse nubank-seguranca.com/verificar para reativar em 24h.',
+      link: 'nubank-seguranca.com/verificar',
+      link_real: 'http://phishing-exemplo.com/nubank',
     },
-    metadados: { horario: '14:32' },
+    metadados: { horario: '16:44' },
     gabarito: {
       classificacao_correta: 'bloqueio',
-      indicadores_validos: ['urgencia', 'remetente_estranho', 'link_suspeito', 'erro_gramatical'],
-      indicadores_obrigatorios: ['urgencia', 'remetente_estranho', 'link_suspeito', 'erro_gramatical'],
+      indicadores_validos: ['urgencia', 'remetente_estranho', 'link_suspeito'],
+      indicadores_obrigatorios: ['urgencia', 'remetente_estranho', 'link_suspeito'],
       eh_fraude: true,
-      explicacao: 'Bancos nunca enviam e-mails de outlook.com.br. O link encurtado esconde o destino real. O uso de "URGENTE" e prazos curtos é gatilho clássico de engenharia social.',
+      explicacao: 'O Nubank nunca envia mensagens de segurança por número de celular desconhecido. O domínio "nubank-seguranca.com" não é nubank.com.br. Sempre acesse o app diretamente.',
     },
   },
   {
-    id: 'M1-02',
-    onda: 1,
-    canal: 'whatsapp',
+    id: 'VM-02',
+    app: 'vespas-msg',
+    remetente: {
+      nome: 'Mãe',
+      avatar: '❤️',
+      verificado: false,
+      contato_salvo: true,
+      numero_ou_email: '+55 41 99888-1234',
+    },
+    conteudo: {
+      texto: 'Oi filho, tô no trabalho. Pode me mandar R$80 pelo Pix? Esqueci a carteira. Te devolvo hoje à noite',
+    },
+    metadados: { horario: '13:22' },
+    gabarito: {
+      classificacao_correta: 'suspeito',
+      indicadores_validos: ['contexto_inesperado', 'pressao_financeira'],
+      indicadores_obrigatorios: ['contexto_inesperado', 'pressao_financeira'],
+      eh_fraude: true,
+      explicacao: 'Pode ser a mãe de verdade — ou alguém que clonou o WhatsApp dela. Sempre LIGUE antes de enviar qualquer dinheiro. Verificação por canal alternativo é essencial.',
+    },
+  },
+  {
+    id: 'VM-03',
+    app: 'vespas-msg',
     remetente: {
       nome: 'Colégio Estadual',
       avatar: 'C',
@@ -39,7 +59,7 @@ export const MENSAGENS: Mensagem[] = [
       numero_ou_email: '+55 41 99999-0001',
     },
     conteudo: {
-      texto: 'Lembrando que amanhã não haverá aula por conta do recesso municipal. Dúvidas, fale com a secretaria.',
+      texto: 'Lembrando: amanhã não haverá aula pelo recesso municipal. Dúvidas, fale com a secretaria pelo número oficial.',
     },
     metadados: { horario: '08:15' },
     gabarito: {
@@ -50,119 +70,46 @@ export const MENSAGENS: Mensagem[] = [
       explicacao: 'Mensagem de número já salvo, sem pedido de ação, sem link, sem urgência. Nada suspeito aqui.',
     },
   },
-  {
-    id: 'M1-03',
-    onda: 1,
-    canal: 'sms',
-    remetente: {
-      nome: '+55 11 98888-7777',
-      avatar: '?',
-      verificado: false,
-      contato_salvo: false,
-      numero_ou_email: '+55 11 98888-7777',
-    },
-    conteudo: {
-      texto: 'Parabens! Voce foi selecionado para receber R$2.847,00 do programa Renda Extra do Governo Federal. Resgate em: gov-renda-extra.blogspot.com',
-      link: 'gov-renda-extra.blogspot.com',
-      link_real: 'http://phishing-exemplo.com/renda-extra',
-    },
-    metadados: { horario: '11:07' },
-    gabarito: {
-      classificacao_correta: 'bloqueio',
-      indicadores_validos: ['urgencia', 'remetente_estranho', 'link_suspeito', 'erro_gramatical', 'pedido_dado_sensivel'],
-      indicadores_obrigatorios: ['urgencia', 'remetente_estranho', 'link_suspeito', 'erro_gramatical', 'pedido_dado_sensivel'],
-      eh_fraude: true,
-      explicacao: 'Erros de acentuação, número desconhecido, domínio de blog (.blogspot) fingindo ser governo. Nenhum programa do governo distribui dinheiro por SMS.',
-    },
-  },
 
-  // ─── Onda 2: Brasileiros ──────────────────────────────────────────────────
+  // ─── VESPASGRAM ───────────────────────────────────────────────────────────────
   {
-    id: 'M2-01',
-    onda: 2,
-    canal: 'whatsapp',
+    id: 'VG-01',
+    app: 'vespasgram',
     remetente: {
-      nome: 'Nubank',
-      avatar: 'N',
-      verificado: false,
+      nome: 'suporte.vespasgram',
+      avatar: 'S',
+      verificado: true, // badge FALSO
       contato_salvo: false,
-      numero_ou_email: '+55 11 91234-5678',
+      numero_ou_email: '@suporte.vespasgram',
+      followers: 12,
     },
     conteudo: {
-      texto: 'Seu Pix foi temporariamente suspenso por atividade suspeita. Para liberar, confirme seus dados em: nubank-seguranca.com/verificar',
-      link: 'nubank-seguranca.com/verificar',
-      link_real: 'http://phishing-exemplo.com/nubank',
+      texto: 'Sua conta foi reportada 3 vezes. Para evitar suspensão acesse: vespasgram-suporte.net/verificar agora.',
+      link: 'vespasgram-suporte.net/verificar',
+      link_real: 'http://phishing-exemplo.com/insta',
     },
-    metadados: { horario: '16:44' },
+    metadados: { horario: '19:02' },
     gabarito: {
       classificacao_correta: 'bloqueio',
-      indicadores_validos: ['remetente_estranho', 'link_suspeito', 'pedido_dado_sensivel', 'contexto_inesperado'],
-      indicadores_obrigatorios: ['remetente_estranho', 'link_suspeito', 'pedido_dado_sensivel', 'contexto_inesperado'],
+      indicadores_validos: ['urgencia', 'remetente_estranho', 'link_suspeito', 'dominio_falso'],
+      indicadores_obrigatorios: ['urgencia', 'remetente_estranho', 'link_suspeito', 'dominio_falso'],
       eh_fraude: true,
-      explicacao: 'O Nubank nunca usa números de celular para comunicados de segurança. O domínio "nubank-seguranca.com" não é nubank.com.br. Sempre acesse apps diretamente.',
+      explicacao: 'O badge de verificação pode ser comprado por qualquer um no Vespasgram. O usuário "@suporte.vespasgram" não é o suporte oficial. O domínio "vespasgram-suporte.net" não é vespasgram.com.',
     },
   },
   {
-    id: 'M2-02',
-    onda: 2,
-    canal: 'sms',
+    id: 'VG-02',
+    app: 'vespasgram',
     remetente: {
-      nome: 'CORREIOS',
-      avatar: 'C',
-      verificado: false,
-      contato_salvo: false,
-      numero_ou_email: 'CORREIOS',
-    },
-    conteudo: {
-      texto: 'Seu pacote (BR123456789) está retido na alfândega. Taxa de R$14,90 necessária. Acesse: correios-rastreio.net/liberar',
-      link: 'correios-rastreio.net/liberar',
-      link_real: 'http://phishing-exemplo.com/correios',
-    },
-    metadados: { horario: '09:30' },
-    gabarito: {
-      classificacao_correta: 'bloqueio',
-      indicadores_validos: ['link_suspeito', 'pedido_dado_sensivel', 'remetente_estranho'],
-      indicadores_obrigatorios: ['link_suspeito', 'pedido_dado_sensivel'],
-      eh_fraude: true,
-      explicacao: 'O remetente alfanumérico pode ser falsificado (SIM Swapping). O domínio correto dos Correios é correios.com.br, não correios-rastreio.net. Taxa de alfândega legítima nunca é paga por link de SMS.',
-    },
-  },
-  {
-    id: 'M2-03',
-    onda: 2,
-    canal: 'whatsapp',
-    remetente: {
-      nome: 'Mãe',
-      avatar: '❤️',
-      verificado: false,
-      contato_salvo: true,
-      numero_ou_email: '+55 41 99888-1234',
-    },
-    conteudo: {
-      texto: 'Oi filho, tô no trabalho ainda. Pode me mandar R$50 pelo Pix? Esqueci a carteira em casa. Depois te devolvo quando chegar',
-    },
-    metadados: { horario: '13:22' },
-    gabarito: {
-      classificacao_correta: 'suspeito',
-      indicadores_validos: ['contexto_inesperado', 'pressao_financeira'],
-      indicadores_obrigatorios: ['contexto_inesperado', 'pressao_financeira'],
-      eh_fraude: true,
-      explicacao: 'Pode ser a mãe de verdade — ou alguém que clonou o WhatsApp dela. A ação correta é LIGAR para a mãe antes de enviar qualquer dinheiro. Verificação por canal alternativo.',
-    },
-  },
-  {
-    id: 'M2-04',
-    onda: 2,
-    canal: 'instagram',
-    remetente: {
-      nome: '@vagas_empresa_xpto',
+      nome: 'vagas.empresa.oficial',
       avatar: 'V',
       verificado: false,
       contato_salvo: false,
-      numero_ou_email: '340 seguidores',
+      numero_ou_email: '@vagas.empresa.oficial',
+      followers: 847,
     },
     conteudo: {
-      texto: 'Olá! Temos vagas de digitador em home office, R$800/semana. Sem experiência. Clique no link da bio para se cadastrar.',
+      texto: 'Olá! Temos vagas de criador de conteúdo, R$1500/semana, home office. Sem experiência. Link na bio para se inscrever.',
     },
     metadados: { horario: '18:05' },
     gabarito: {
@@ -170,74 +117,97 @@ export const MENSAGENS: Mensagem[] = [
       indicadores_validos: ['remetente_estranho', 'contexto_inesperado'],
       indicadores_obrigatorios: ['remetente_estranho', 'contexto_inesperado'],
       eh_fraude: true,
-      explicacao: 'Conta sem verificação, poucos seguidores, promessa de remuneração alta sem exigência de qualificação são sinais de alerta. Não é certeza de golpe, mas exige pesquisa antes de qualquer clique.',
-    },
-  },
-
-  // ─── Onda 3: Direcionados ─────────────────────────────────────────────────
-  {
-    id: 'M3-01',
-    onda: 3,
-    canal: 'whatsapp',
-    remetente: {
-      nome: 'Diretora Marcia Silva',
-      avatar: 'D',
-      verificado: false,
-      contato_salvo: false,
-      numero_ou_email: '+55 41 98877-6655',
-    },
-    conteudo: {
-      texto: 'Boa tarde. Sou a diretora do colégio. Precisamos que você traga amanhã o comprovante de residência atualizado. Qualquer dúvida, responda aqui mesmo.',
-    },
-    metadados: { horario: '15:10' },
-    gabarito: {
-      classificacao_correta: 'suspeito',
-      indicadores_validos: ['remetente_estranho', 'contexto_inesperado', 'numero_desconhecido'],
-      indicadores_obrigatorios: ['remetente_estranho', 'contexto_inesperado'],
-      eh_fraude: true,
-      explicacao: 'A escola tem canais oficiais de comunicação. Um número desconhecido pedindo documentos deve ser verificado diretamente na secretaria presencialmente ou pelo número oficial da escola.',
+      explicacao: 'Conta não verificada com poucos seguidores, promessa de salário alto sem exigir qualificação — sinais de alerta. Pesquise a empresa antes de clicar em qualquer link.',
     },
   },
   {
-    id: 'M3-02',
-    onda: 3,
-    canal: 'instagram',
+    id: 'VG-03',
+    app: 'vespasgram',
     remetente: {
-      nome: '@usuario_conhecido',
-      avatar: 'U',
+      nome: 'carlos.silva99',
+      avatar: 'C',
       verificado: false,
       contato_salvo: true,
-      numero_ou_email: 'Segue você',
+      numero_ou_email: '@carlos.silva99',
+      followers: 312,
     },
     conteudo: {
-      texto: 'ei vc topa fazer uma pesquisa rápida pra mim? é de um minuto só, clica aqui: pesquisa-digital.co/form?ref=amigos',
-      link: 'pesquisa-digital.co/form?ref=amigos',
-      link_real: 'http://phishing-exemplo.com/pesquisa',
+      texto: 'Te marquei naquela foto da festa do sábado, vai lá ver!',
     },
     metadados: { horario: '20:33' },
     gabarito: {
-      classificacao_correta: 'suspeito',
-      indicadores_validos: ['link_suspeito', 'contexto_inesperado'],
-      indicadores_obrigatorios: ['link_suspeito', 'contexto_inesperado'],
+      classificacao_correta: 'confio',
+      indicadores_validos: [],
+      indicadores_obrigatorios: [],
+      eh_fraude: false,
+      explicacao: 'Contato salvo marcando em foto de evento real. Nenhum link suspeito, nenhum pedido incomum.',
+    },
+  },
+
+  // ─── VMAIL ────────────────────────────────────────────────────────────────────
+  {
+    id: 'VE-01',
+    app: 'vmail',
+    remetente: {
+      nome: 'Receita Federal',
+      avatar: 'R',
+      verificado: false,
+      contato_salvo: false,
+      numero_ou_email: 'atendimento@receitafederal.gov.br.net',
+    },
+    conteudo: {
+      assunto: 'PENDÊNCIA URGENTE — CPF será cancelado em 48h',
+      texto: 'Identificamos irregularidade no seu CPF. Regularize em: gov-regulariza-cpf.com antes do prazo para evitar multas.',
+      link: 'gov-regulariza-cpf.com',
+      link_real: 'http://phishing-exemplo.com/cpf',
+    },
+    metadados: { horario: '14:32' },
+    gabarito: {
+      classificacao_correta: 'bloqueio',
+      indicadores_validos: ['urgencia', 'remetente_estranho', 'link_suspeito', 'erro_gramatical', 'dominio_falso'],
+      indicadores_obrigatorios: ['urgencia', 'remetente_estranho', 'link_suspeito', 'erro_gramatical', 'dominio_falso'],
       eh_fraude: true,
-      explicacao: 'A conta pode ter sido comprometida. Pedido de clique em link sem contexto, mesmo de contato conhecido, merece uma confirmação direta — ligar ou mandar mensagem por outro canal.',
+      explicacao: 'O domínio do remetente "gov.br.net" não é gov.br. A Receita Federal usa somente receita.fazenda.gov.br. Nenhum órgão público suspende CPF por e-mail.',
     },
   },
   {
-    id: 'M3-03',
-    onda: 3,
-    canal: 'email',
+    id: 'VE-02',
+    app: 'vmail',
     remetente: {
-      nome: 'Secretaria Acadêmica',
-      avatar: 'S',
-      verificado: true,
+      nome: 'Americanas',
+      avatar: 'A',
+      verificado: false,
       contato_salvo: false,
-      numero_ou_email: 'secretaria@colegioestadual.edu.br',
+      numero_ou_email: 'ofertas@americanas-promo.com.br',
     },
     conteudo: {
-      texto: 'Informamos que o boletim do 2º bimestre está disponível no Portal do Aluno. Acesse: portaldoaluno.colegioestadual.edu.br',
-      link: 'portaldoaluno.colegioestadual.edu.br',
-      link_real: 'https://portaldoaluno.colegioestadual.edu.br',
+      assunto: 'Só hoje: 70% OFF em eletrônicos selecionados',
+      texto: 'Aproveite nossas ofertas exclusivas. Válido apenas hoje. Acesse agora antes que acabe!',
+    },
+    metadados: { horario: '10:48' },
+    gabarito: {
+      classificacao_correta: 'suspeito',
+      indicadores_validos: ['remetente_estranho', 'urgencia'],
+      indicadores_obrigatorios: ['remetente_estranho', 'urgencia'],
+      eh_fraude: true,
+      explicacao: 'O domínio "americanas-promo.com.br" não é americanas.com.br. Verifique sempre o domínio exato antes de clicar em promoções por e-mail.',
+    },
+  },
+  {
+    id: 'VE-03',
+    app: 'vmail',
+    remetente: {
+      nome: 'UTFPR',
+      avatar: 'U',
+      verificado: true,
+      contato_salvo: false,
+      numero_ou_email: 'noreply@utfpr.edu.br',
+    },
+    conteudo: {
+      assunto: 'Confirmação de matrícula — 2025/2',
+      texto: 'Sua matrícula foi confirmada. Acesse o portal em portal.utfpr.edu.br para ver sua grade horária.',
+      link: 'portal.utfpr.edu.br',
+      link_real: 'https://portal.utfpr.edu.br',
     },
     metadados: { horario: '07:00' },
     gabarito: {
@@ -245,88 +215,177 @@ export const MENSAGENS: Mensagem[] = [
       indicadores_validos: [],
       indicadores_obrigatorios: [],
       eh_fraude: false,
-      explicacao: 'E-mail institucional real (.edu.br), link no mesmo domínio da instituição, sem urgência e sem pedido de dado sensível. Este é o padrão de comunicação legítima.',
+      explicacao: 'E-mail institucional real (.edu.br), link no mesmo domínio da instituição, sem urgência e sem pedido de dado sensível.',
     },
   },
 
-  // ─── Onda 4: Pós-IA ──────────────────────────────────────────────────────
+  // ─── VLINKED ─────────────────────────────────────────────────────────────────
   {
-    id: 'M4-01',
-    onda: 4,
-    canal: 'whatsapp',
+    id: 'VL-01',
+    app: 'vlinked',
     remetente: {
-      nome: 'Tio João',
-      avatar: '👴',
-      verificado: false,
-      contato_salvo: true,
-      numero_ou_email: '+55 41 97766-5544',
-    },
-    conteudo: {
-      texto: '01:12',
-      audio: true,
-    },
-    metadados: { horario: '22:14' },
-    gabarito: {
-      classificacao_correta: 'bloqueio',
-      indicadores_validos: ['deepfake_audio', 'pressao_financeira', 'contexto_inesperado'],
-      indicadores_obrigatorios: ['deepfake_audio', 'pressao_financeira', 'contexto_inesperado'],
-      eh_fraude: true,
-      explicacao: 'Clonagem de voz por IA está acessível hoje. Antes de qualquer ação, ligue diretamente para o número que você sempre usa para falar com essa pessoa. O pedido de sigilo é sinal claro de manipulação.',
-    },
-  },
-  {
-    id: 'M4-02',
-    onda: 4,
-    canal: 'email',
-    remetente: {
-      nome: 'RH Corporativo',
-      avatar: 'R',
+      nome: 'Sarah Johnson',
+      avatar: 'S',
       verificado: false,
       contato_salvo: false,
-      numero_ou_email: 'rh@empresa-tech.com.br',
+      numero_ou_email: 'Recrutadora @ Google Brasil',
+      cargo: 'Recrutadora Sênior',
+      empresa: 'Google Brasil',
     },
     conteudo: {
-      texto: 'Seu currículo foi selecionado. Para avançar, faça a entrevista inicial com nossa IA em: entrevista.empresa-tech.com.br. Envie também seu CPF e data de nascimento para geração do contrato.',
-      link: 'entrevista.empresa-tech.com.br',
-      link_real: 'http://phishing-exemplo.com/emprego',
+      texto: 'Olá! Vi seu perfil e temos uma vaga de R$15.000/mês para você. Envie CPF e dados bancários para pré-cadastro.',
     },
-    metadados: { horario: '10:48' },
+    metadados: { horario: '11:15' },
     gabarito: {
       classificacao_correta: 'bloqueio',
-      indicadores_validos: ['pedido_dado_sensivel', 'link_suspeito', 'contexto_inesperado'],
-      indicadores_obrigatorios: ['pedido_dado_sensivel', 'link_suspeito'],
+      indicadores_validos: ['pedido_dado_sensivel', 'remetente_estranho', 'contexto_inesperado'],
+      indicadores_obrigatorios: ['pedido_dado_sensivel', 'remetente_estranho', 'contexto_inesperado'],
       eh_fraude: true,
-      explicacao: 'Empresas legítimas nunca pedem CPF por e-mail antes de qualquer etapa. "entrevista.empresa-tech.com.br" pode ser domínio diferente de "empresa-tech.com.br". Verifique no site oficial da empresa antes de fornecer qualquer dado.',
+      explicacao: 'Nenhuma empresa legítima pede CPF e dados bancários numa primeira mensagem. Perfil sem foto, criado recentemente. Verifique o perfil completo antes de responder qualquer recrutador.',
     },
   },
   {
-    id: 'M4-03',
-    onda: 4,
-    canal: 'whatsapp',
+    id: 'VL-02',
+    app: 'vlinked',
     remetente: {
-      nome: 'Família 👨‍👩‍👧‍👦',
-      avatar: '👵',
+      nome: 'Carlos Mendes',
+      avatar: 'C',
       verificado: false,
-      contato_salvo: true,
-      numero_ou_email: 'Avó • Grupo familiar',
+      contato_salvo: false,
+      numero_ou_email: 'CEO @ Empresa Desconhecida',
+      cargo: 'CEO',
+      empresa: 'Empresa Desconhecida Ltda',
     },
     conteudo: {
-      texto: 'URGENTE: Governo libera saque de R$3.000 para todos os cidadãos. Cadastre-se antes de amanhã: auxilio-extra-gov.com',
-      link: 'auxilio-extra-gov.com',
-      link_real: 'http://phishing-exemplo.com/auxilio',
-      imagem: true,
+      texto: 'Olá, gostaria de adicionar você à minha rede de contatos profissionais. Tenho uma proposta interessante.',
+    },
+    metadados: { horario: '14:20' },
+    gabarito: {
+      classificacao_correta: 'suspeito',
+      indicadores_validos: ['contexto_inesperado', 'remetente_estranho'],
+      indicadores_obrigatorios: ['contexto_inesperado'],
+      eh_fraude: true,
+      explicacao: 'Convite genérico de CEO de empresa desconhecida com "proposta interessante" sem contexto. Pesquise a empresa antes de aceitar e jamais compartilhe dados antes de verificar.',
+    },
+  },
+  {
+    id: 'VL-03',
+    app: 'vlinked',
+    remetente: {
+      nome: 'Ana Paula Souza',
+      avatar: 'A',
+      verificado: false,
+      contato_salvo: true,
+      numero_ou_email: 'Estudante de TI @ UTFPR',
+      cargo: 'Estudante de TI',
+      empresa: 'UTFPR',
+    },
+    conteudo: {
+      texto: 'Oi! Estudamos juntos no semestre passado. Posso te adicionar para manter contato profissional?',
+    },
+    metadados: { horario: '09:45' },
+    gabarito: {
+      classificacao_correta: 'confio',
+      indicadores_validos: [],
+      indicadores_obrigatorios: [],
+      eh_fraude: false,
+      explicacao: 'Colega conhecida com 47 conexões em comum. Pedido de conexão com contexto claro e sem solicitações incomuns.',
+    },
+  },
+
+  // ─── VCORD ───────────────────────────────────────────────────────────────────
+  {
+    id: 'VD-01',
+    app: 'vcord',
+    remetente: {
+      nome: 'ModBot_Oficial',
+      avatar: '🤖',
+      verificado: false,
+      contato_salvo: false,
+      numero_ou_email: 'ModBot_Oficial#0001',
+      discriminator: '#0001',
+      cargo_servidor: 'BOT',
+    },
+    conteudo: {
+      texto: 'Você foi selecionado para teste beta do Discord Nitro GRÁTIS! Resgate em: discord-nitro-free.xyz/resgate — expira em 1h',
+      link: 'discord-nitro-free.xyz/resgate',
+      link_real: 'http://phishing-exemplo.com/nitro',
+    },
+    metadados: { horario: '21:30' },
+    gabarito: {
+      classificacao_correta: 'bloqueio',
+      indicadores_validos: ['urgencia', 'link_suspeito', 'dominio_falso', 'remetente_estranho'],
+      indicadores_obrigatorios: ['urgencia', 'link_suspeito', 'dominio_falso', 'remetente_estranho'],
+      eh_fraude: true,
+      explicacao: 'O Discord nunca distribui Nitro gratuito por DM. O domínio "discord-nitro-free.xyz" não é discord.com. Conta sem avatar e recém-criada são sinais clássicos de scam.',
+    },
+  },
+  {
+    id: 'VD-02',
+    app: 'vcord',
+    remetente: {
+      nome: 'gamer_br_2007',
+      avatar: '🎮',
+      verificado: false,
+      contato_salvo: true,
+      numero_ou_email: 'gamer_br_2007#4567',
+      discriminator: '#4567',
+      cargo_servidor: 'Membro',
+    },
+    conteudo: {
+      texto: 'Ei, pode me emprestar sua conta por 10min? Tô banido de votar naquele torneio e minha equipe precisa muito de mim',
     },
     metadados: { horario: '19:55' },
     gabarito: {
-      classificacao_correta: 'bloqueio',
-      indicadores_validos: ['urgencia', 'link_suspeito', 'dominio_falso'],
-      indicadores_obrigatorios: ['urgencia', 'link_suspeito', 'dominio_falso'],
+      classificacao_correta: 'suspeito',
+      indicadores_validos: ['contexto_inesperado', 'pedido_dado_sensivel'],
+      indicadores_obrigatorios: ['contexto_inesperado', 'pedido_dado_sensivel'],
       eh_fraude: true,
-      explicacao: 'Imagens de manchetes podem ser fabricadas ou editadas. O domínio não é .gov.br. A avó provavelmente caiu no golpe antes. Verifique sempre em fontes oficiais (gov.br) antes de clicar ou repassar.',
+      explicacao: 'Compartilhar credenciais nunca é seguro, independente de quem peça. "10 minutos" pode virar acesso permanente. Sua conta pode ser usada para scams ou banida.',
+    },
+  },
+  {
+    id: 'VD-03',
+    app: 'vcord',
+    remetente: {
+      nome: 'AdminVESPAS',
+      avatar: 'A',
+      verificado: true,
+      contato_salvo: false,
+      numero_ou_email: 'AdminVESPAS#0001',
+      discriminator: '#0001',
+      cargo_servidor: 'Admin',
+    },
+    conteudo: {
+      texto: 'Lembrete: reunião de estudos hoje às 19h no canal de voz #estudos-ctf. Tragam os writeups da semana!',
+    },
+    metadados: { horario: '17:00' },
+    gabarito: {
+      classificacao_correta: 'confio',
+      indicadores_validos: [],
+      indicadores_obrigatorios: [],
+      eh_fraude: false,
+      explicacao: 'Administrador do servidor com cargo verificado, sem link suspeito, sem pedido de dado. Aviso legítimo de evento interno.',
     },
   },
 ]
 
+export function getMensagem(id: string): Mensagem | undefined {
+  return MENSAGENS.find((m) => m.id === id)
+}
+
+export function getMensagensPorApp(app: AppSlug): Mensagem[] {
+  return MENSAGENS.filter((m) => m.app === app)
+}
+
+/** @deprecated Use getMensagensPorApp instead */
 export function getMensagensDaOnda(onda: 1 | 2 | 3 | 4): Mensagem[] {
-  return MENSAGENS.filter((m) => m.onda === onda)
+  const appMap: Record<number, AppSlug[]> = {
+    1: ['vespas-msg'],
+    2: ['vespasgram', 'vmail'],
+    3: ['vlinked'],
+    4: ['vcord'],
+  }
+  const apps = appMap[onda] ?? []
+  return MENSAGENS.filter((m) => apps.includes(m.app))
 }

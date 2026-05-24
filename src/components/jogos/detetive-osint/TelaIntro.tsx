@@ -37,8 +37,9 @@ export function TelaIntro({ onConcluir }: TelaIntroProps) {
         setConcluido(true)
         return
       }
-      setLinhasVisiveis((prev) => [...prev, LINHAS_TERMINAL[i]])
+      const linhaAtual = LINHAS_TERMINAL[i]
       i++
+      setLinhasVisiveis((prev) => [...prev, linhaAtual])
     }, 180)
 
     return () => clearInterval(intervalo)

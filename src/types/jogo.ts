@@ -4,5 +4,6 @@ export interface ConfigJogo {
   nivel: number
   cor: string
   disponivel: boolean
+  concluido?: boolean
   icon: string
 }
